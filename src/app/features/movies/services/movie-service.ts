@@ -4,12 +4,17 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { Movie } from '../models/movie.model';
 import { MovieResponse } from '../models/movie-response.model';
 import { MovieUI } from '../models/movie-details.modal';
+import { API_CONFIG } from '../../../core/api.config';
+import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MovieService {
   private api = inject(ApiService);
+  private headers = new HttpHeaders(({
+    Authorization: `Bearer ${API_CONFIG.apiKey}`
+  }));
 
   private getImageUrl(path: string | null, size: string = 'w500'): string {
     return path
@@ -36,8 +41,9 @@ export class MovieService {
 
   // 🔥 1. Pel·lícules populars
   getPopularMovies(page: number = 1): Observable<MovieUI[]> {
+    const params = new HttpParams().set('page', page);
     return this.api
-      .get<MovieResponse>('/movie/popular', { page })
+      .get<MovieResponse>('/movie/popular', { headers: this.headers, params })
       .pipe(
         map(res => this.mapListToUI(res.results)),
         catchError(this.handleError<MovieUI[]>('getPopularMovies', []))
@@ -54,33 +60,22 @@ export class MovieService {
       );
   }
 
-  // 📈 Trending
-  getTrendingMovies(): Observable<MovieUI[]> {
+  // 🎬 Movie detail
+  getMovieById(id: number): Observable<MovieUI | null> {
+    const params = new HttpParams().set('append_to_response', 'credits,videos');
     return this.api
-      .get<MovieResponse>('/trending/movie/day')
+      .get<Movie>(`/movie/${id}`, { params })
       .pipe(
-        map(res => this.mapListToUI(res.results)),
-        catchError(this.handleError<MovieUI[]>('getTrendingMovies', []))
-      );
-  }
-
-  // 🎭 Movies by genre
-  getMoviesByGenre(genreId: number, page: number = 1): Observable<MovieUI[]> {
-    return this.api
-      .get<MovieResponse>('/discover/movie', {
-        with_genres: genreId,
-        page
-      })
-      .pipe(
-        map(res => this.mapListToUI(res.results)),
-        catchError(this.handleError<MovieUI[]>('getMoviesByGenre', []))
+        map(movie => this.mapToUI(movie)),
+        catchError(this.handleError<MovieUI | null>('getMovieById', null))
       );
   }
 
   // 🎬 Movie detail
-  getMovieById(id: number): Observable<MovieUI | null> {
+  getActorById(id: number): Observable<MovieUI | null> {
+    const params = new HttpParams().set('append_to_response', 'credits,videos');
     return this.api
-      .get<Movie>(`/movie/${id}`)
+      .get<Movie>(`/movie/${id}`, { params })
       .pipe(
         map(movie => this.mapToUI(movie)),
         catchError(this.handleError<MovieUI | null>('getMovieById', null))
