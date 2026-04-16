@@ -1,0 +1,48 @@
+@let a = actor();
+
+@if (loading()) {
+  <p class="text-center py-12 text-gray-400">Loading actor...</p>
+}
+
+@else if (a) {
+
+<section class=" text-gray-100 min-h-screen">
+  <article class="relative bg-cover bg-center min-h-[60vh] flex items-end rounded-2xl overflow-hidden text-amber-50"
+    [style.background-image]="'url(' + getImage(a.profile_path) + ')'">
+
+    <div class="absolute inset-0 bg-black/70"></div>
+
+  <header class="relative max-w-6xl mx-auto px-4 py-10 w-full">
+    <div class="flex flex-col items-start gap-4">
+      <img 
+        class="w-40 md:w-56 rounded-xl shadow-lg"
+        [src]="getImage(a.profile_path)" 
+        [alt]="a.name"
+      />
+      <div>
+        <h1 class="text-2xl font-bold">
+          {{ a.name }}
+        </h1>
+        <p class="text-sm text-gray-400">
+          {{ a.known_for_department }}
+        </p>
+      </div>
+    </div>
+  </header>
+  </article>
+
+  <article class="mx-auto px-4 py-6">
+    <h2 class="text-2xl font-semibold mb-4 text-black">Biography</h2>
+    <p class="text-black leading-relaxed">
+      {{ a.biography || 'No biography available.' }}
+    </p>
+  </article>
+
+  <article class="px-4 mx-auto">
+    <h2 class="text-lg font-semibold mb-4">Filmography</h2>
+    <app-movie-grid [movies]="movies()"></app-movie-grid>
+  </article>
+
+</section>
+
+}
