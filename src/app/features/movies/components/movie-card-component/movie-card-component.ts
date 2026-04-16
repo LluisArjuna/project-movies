@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
-import { MovieUI } from '../../models/movie-details.modal';
+import { MovieCardUI } from '../../models/movie-details.modal';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -10,7 +10,7 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MovieCardComponent {
-  movie = input.required<MovieUI>();
+  movie = input.required<MovieCardUI>();
   
   get year(): string {
     return this.movie().releaseDate

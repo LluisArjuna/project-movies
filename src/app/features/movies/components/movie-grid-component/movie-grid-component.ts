@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MovieCardComponent } from '../movie-card-component/movie-card-component';
 import { CommonModule } from '@angular/common';
-import { MovieUI } from '../../models/movie-details.modal';
+import { MovieCardUI } from '../../models/movie-details.modal';
 
 @Component({
   selector: 'app-movie-grid',
@@ -10,5 +10,5 @@ import { MovieUI } from '../../models/movie-details.modal';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MovieGridComponent {
-  movies = input.required<MovieUI[]>();
+  movies = input.required<MovieCardUI[]>();
 }

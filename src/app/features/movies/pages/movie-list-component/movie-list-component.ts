@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { MovieGridComponent } from '../../components/movie-grid-component/movie-grid-component';
 import { CommonModule } from '@angular/common';
-import { MovieUI } from '../../models/movie-details.modal';
+import { MovieCardUI } from '../../models/movie-details.modal';
 import { MovieService } from '../../services/movie-service';
 import { MovieSearchComponent } from '../../components/movie-search-component/movie-search-component';
 
@@ -13,7 +13,7 @@ import { MovieSearchComponent } from '../../components/movie-search-component/mo
 export class MovieListComponent {
   private movieService = inject(MovieService);
 
-  movies = signal<MovieUI[]>([]);
+  movies = signal<MovieCardUI[]>([]);
   loading = signal<boolean>(true);
   error = signal<boolean>(false);
 
