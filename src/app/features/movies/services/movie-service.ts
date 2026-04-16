@@ -1,11 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../../../core/api.service';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 import { Movie } from '../models/movie.model';
 import { MovieResponse } from '../models/movie-response.model';
-import { MovieUI } from '../models/movie-details.modal';
+import { MovieCredits, MovieDetail, MovieCardUI, MovieDetailUI } from '../models/movie-details.modal';
 import { API_CONFIG } from '../../../core/api.config';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { MovieCredit, Person, PersonCredits } from '../models/actor.modal';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class MovieService {
       : 'assets/no-image.png';
   }
 
-  private mapToUI(movie: Movie): MovieUI {
+  private mapToUI(movie: Movie): MovieCardUI {
     return {
       id: movie.id,
       title: movie.title,
@@ -31,55 +32,100 @@ export class MovieService {
         ? this.getImageUrl(movie.backdrop_path, 'w780')
         : null,
       rating: movie.vote_average,
-      releaseDate: movie.release_date
+      releaseDate: movie.release_date,
+      overview: movie.overview,
     };
   }
 
-  private mapListToUI(movies: Movie[]): MovieUI[] {
+  private mapToUIDetail(movie: MovieDetail, credits: MovieCredits): MovieDetailUI {
+
+    const director = credits.crew.find(person => person.job === 'Director');
+
+    return {
+      id: movie.id,
+      title: movie.title,
+      posterUrl: this.getImageUrl(movie.poster_path),
+      backdropUrl: movie.backdrop_path
+        ? this.getImageUrl(movie.backdrop_path, 'w780')
+        : null,
+
+      overview: movie.overview,
+      rating: movie.vote_average,
+      releaseDate: movie.release_date,
+      runtime: movie.runtime,
+
+      genres: movie.genres || [],
+
+      director: director
+        ? { id: director.id, name: director.name }
+        : undefined,
+
+      cast: credits.cast.slice(0, 10).map(actor => ({
+        id: actor.id,
+        name: actor.name,
+        character: actor.character,
+        profileUrl: this.getImageUrl(actor.profile_path, 'w185')
+      }))
+    };
+  }
+
+  private mapListToUI(movies: Movie[]): MovieCardUI[] {
     return movies.map(movie => this.mapToUI(movie));
   }
 
-  // 🔥 1. Pel·lícules populars
-  getPopularMovies(page: number = 1): Observable<MovieUI[]> {
+  private mapCreditToUI(movie: MovieCredit): MovieCardUI {
+  return {
+    id: movie.id,
+    title: movie.title,
+    posterUrl: this.getImageUrl(movie.poster_path),
+    backdropUrl: null, // no disponible
+    rating: movie.vote_average,
+    releaseDate: movie.release_date,
+    overview: '' // no disponible
+  };
+}
+
+  getPopularMovies(page: number = 1): Observable<MovieCardUI[]> {
     const params = new HttpParams().set('page', page);
     return this.api
       .get<MovieResponse>('/movie/popular', { headers: this.headers, params })
       .pipe(
         map(res => this.mapListToUI(res.results)),
-        catchError(this.handleError<MovieUI[]>('getPopularMovies', []))
+        catchError(this.handleError<MovieCardUI[]>('getPopularMovies', []))
       );
   }
 
-  // 🔍 Search movies
-  searchMovies(query: string, page: number = 1): Observable<MovieUI[]> {
+  searchMovies(query: string, page: number = 1): Observable<MovieCardUI[]> {
+    const params = new HttpParams().set('query', query).set('page', page);
     return this.api
       .get<MovieResponse>('/search/movie', { query, page })
       .pipe(
         map(res => this.mapListToUI(res.results)),
-        catchError(this.handleError<MovieUI[]>('searchMovies', []))
+        catchError(this.handleError<MovieCardUI[]>('searchMovies', []))
       );
   }
 
-  // 🎬 Movie detail
-  getMovieById(id: number): Observable<MovieUI | null> {
-    const params = new HttpParams().set('append_to_response', 'credits,videos');
-    return this.api
-      .get<Movie>(`/movie/${id}`, { params })
-      .pipe(
-        map(movie => this.mapToUI(movie)),
-        catchError(this.handleError<MovieUI | null>('getMovieById', null))
-      );
-  }
-
-  // 🎬 Movie detail
-  getActorById(id: number): Observable<MovieUI | null> {
-    const params = new HttpParams().set('append_to_response', 'credits,videos');
-    return this.api
-      .get<Movie>(`/movie/${id}`, { params })
-      .pipe(
-        map(movie => this.mapToUI(movie)),
-        catchError(this.handleError<MovieUI | null>('getMovieById', null))
-      );
+  getMovieDetail(id: number): Observable<MovieDetailUI> {
+  return forkJoin({
+    details: this.api.get<MovieDetail>(`/movie/${id}`),
+    credits: this.api.get<MovieCredits>(`/movie/${id}/credits`)
+  }).pipe(
+    map(({ details, credits }) =>
+      this.mapToUIDetail(details, credits)
+    )
+  );
+}
+  
+  getActorDetail(id: number): Observable<{ person: Person; movies: MovieCardUI[] }> {
+    return forkJoin({
+      person: this.api.get<Person>(`/person/${id}`),
+      credits: this.api.get<PersonCredits>(`/person/${id}/movie_credits`)
+    }).pipe(
+      map(({ person, credits }) => ({
+        person,
+        movies: credits.cast.map(movie => this.mapCreditToUI(movie))
+      }))
+    );
   }
 
   private handleError<T>(operation: string, result: T) {
