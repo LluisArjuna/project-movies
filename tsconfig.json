@@ -7,7 +7,7 @@
     "paths": {
       "@environments/*": ["src/environments/*"]
     },
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
