@@ -28,8 +28,8 @@ export class RegisterComponent {
     const { name, email, password } = this.form.value;
 
     try {
-       this.authService.register(email!, password!, name!);
-       this.router.navigate(['']);
+      this.authService.register(email!, password!, name!);
+      this.router.navigate(['']);
     } catch (err: any) {
       console.error(err.message);
     }
