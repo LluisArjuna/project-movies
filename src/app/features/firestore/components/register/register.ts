@@ -22,14 +22,14 @@ export class RegisterComponent {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  async register() {
+  register() {
     if (this.form.invalid) return;
 
     const { name, email, password } = this.form.value;
 
     try {
-      await this.authService.register(email!, password!, name!);
-      await this.router.navigate(['/login']);
+       this.authService.register(email!, password!, name!);
+       this.router.navigate(['']);
     } catch (err: any) {
       console.error(err.message);
     }
