@@ -1,9 +1,22 @@
-import { Component } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from 'src/app/features/firestore/services/firestore';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  standalone: true,
+  imports: [RouterLink, AsyncPipe],
   templateUrl: './header.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Header {}
+export class Header {
+
+  private authService = inject(AuthService);
+
+  user$ = this.authService.user$; // Observable d’usuari
+
+  logout() {
+    this.authService.logout();
+  }
+}

@@ -3,8 +3,12 @@
       <h1 class="text-2xl font-bold cursor-pointer hover:text-yellow-400 transition" routerLink="/">Movies</h1>
       <nav class="flex items-center gap-6 text-sm md:text-base">
         <a class="hover:text-yellow-400 transition" routerLink="/">Explorar</a>
-        <a class="hover:text-yellow-400 transition" routerLink="/favorites">Favorites</a>
-        <a class="hover:text-yellow-400 transition" routerLink="/profile">Perfil</a>
+         @if (user$ | async; as user) {
+          <span class="hover:text-yellow-400 transition">Hola {{ user.displayName || user.email }}</span>
+          <button (click)="logout()" class="hover:text-yellow-400 transition">Logout</button>
+        } @else {
+          <a class="hover:text-yellow-400 transition" routerLink="/login">Login</a>
+        }
       </nav>
   </div>
 </header>
