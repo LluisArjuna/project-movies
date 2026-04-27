@@ -39,7 +39,7 @@ export class MovieService {
 
   private mapToUIDetail(movie: MovieDetail, credits: MovieCredits): MovieDetailUI {
 
-    const director = credits.crew.find(person => person.job === 'Director');
+    const director = credits.crew?.find(person => person.job === 'Director');
 
     return {
       id: movie.id,
@@ -78,10 +78,10 @@ export class MovieService {
     id: movie.id,
     title: movie.title,
     posterUrl: this.getImageUrl(movie.poster_path),
-    backdropUrl: null, // no disponible
+    backdropUrl: null,
     rating: movie.vote_average,
     releaseDate: movie.release_date,
-    overview: '' // no disponible
+    overview: ''
   };
 }
 
@@ -96,7 +96,6 @@ export class MovieService {
   }
 
   searchMovies(query: string, page: number = 1): Observable<MovieCardUI[]> {
-    const params = new HttpParams().set('query', query).set('page', page);
     return this.api
       .get<MovieResponse>('/search/movie', { query, page })
       .pipe(
