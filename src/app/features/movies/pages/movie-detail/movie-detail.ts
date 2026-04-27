@@ -1,8 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Injector, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie-service';
-import { MovieCardUI, MovieDetailUI } from '../../models/movie-details.modal';
+import { MovieDetailUI } from '../../models/movie-details.modal';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { FavoritesService } from '../../services/favorites';
+import { map, switchMap, take } from 'rxjs';
+import { Auth } from '@angular/fire/auth';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-movie-detail',
@@ -13,16 +17,29 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 export class MovieDetail {
   private route = inject(ActivatedRoute);
   private movieService = inject(MovieService);
+  private favoritesService = inject(FavoritesService);
 
-  movie = signal<MovieDetailUI | null>(null);
-  loading = signal(true);
+  private injector = inject(Injector);
 
-  ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+  movie = toSignal(
+    this.route.paramMap.pipe(
+      map(params => Number(params.get('id'))),
+      switchMap(id => this.movieService.getMovieDetail(id))
+    ),
+    { initialValue: null, injector: this.injector }
+  );
 
-    this.movieService.getMovieDetail(id).subscribe(movie => {
-      this.movie.set(movie);
-      this.loading.set(false);
-    });
+  favorites = toSignal(this.favoritesService.getFavorites(), { initialValue: [], injector: this.injector });
+  isFavorite = (id: number) => this.favorites().includes(String(id));
+
+  toggleFavorite(movie: MovieDetailUI) {
+    const itemId = movie.id.toString();
+    const favs = this.favorites();
+
+    if (favs.includes(itemId)) {
+      this.favoritesService.removeFavorite(itemId);
+    } else {
+      this.favoritesService.addFavorite(itemId);
+    }
   }
 }
