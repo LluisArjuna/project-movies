@@ -70,8 +70,8 @@ export class MovieService {
   }
 
   private mapListToUI(movies: Movie[]): MovieCardUI[] {
-    return movies.map(movie => this.mapToUI(movie));
-  }
+     return movies.map(movie => this.mapToUI(movie));
+  } 
 
   private mapCreditToUI(movie: MovieCredit): MovieCardUI {
   return {
