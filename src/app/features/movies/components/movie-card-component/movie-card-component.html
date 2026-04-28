@@ -1,0 +1,32 @@
+@if (movie(); as movie) {
+<div 
+  class="group cursor-pointer bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300"
+  [routerLink]="['/movie', movie.id]"
+>
+  <!-- Image -->
+  <div class="relative overflow-hidden">
+    <img 
+      [src]="movie.posterUrl" 
+      [alt]="movie.title"
+      loading="lazy"
+      class="w-full h-72 object-cover group-hover:scale-105 transition duration-300"
+    />
+
+    <!-- Rating badge -->
+    <div class="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs font-semibold px-2 py-1 rounded-lg backdrop-blur-sm">
+      ⭐ {{ movie.rating | number:'1.1-1' }}
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="p-3">
+    <h3 class="text-sm font-semibold text-white line-clamp-2 group-hover:text-yellow-400 transition">
+      {{ movie.title }}
+    </h3>
+
+    <p class="text-xs text-gray-400 mt-1">
+      {{ year }}
+    </p>
+  </div>
+</div>
+}

@@ -1,0 +1,15 @@
+<div class="container">
+  <app-movie-search (search)="onSearch($event)"></app-movie-search> 
+  @if (loading()) {
+    <p class="status">Loading movies...</p>
+  }
+  @else if (error()) {
+    <p class="status error">
+      Error loading movies
+      <button (click)="loadPopularMovies()">Retry</button>
+    </p>
+  }
+  @else {
+    <app-movie-grid [movies]="movies()"></app-movie-grid>
+  }
+</div>
